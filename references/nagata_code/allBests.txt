@@ -1,2 +1,0 @@
-Npás J  P/D Ae/Ao nRev.p/seg. Empuxo Propulsor       KT                  KQ                Rendimento            DHP                BHP                BHP1         RPM1           BHP2       RPM2         BHP3         RPM3 
-Npás J  P/D Ae/Ao nRev.p/seg. Empuxo Propulsor       KT                  KQ                Rendimento            DHP                BHP                BHP1         RPM1           BHP2       RPM2         BHP3         RPM3 

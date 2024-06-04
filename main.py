@@ -1,24 +1,64 @@
+# External imports
 import math
 import numpy as np
-from typing import TypedDict, Literal
-from shared_types import Output
+from typing import Literal
+import itertools
+
+# Internal imports
+from shared_types import Run, Input, Output
 from kt import get_kt
 from kq import get_kq
 from cavitation import get_cavitation_evaluation
 from frontend import pretty_print, save_to_excel
+
 
 '''Leo: (10/05/2024)
 Descrição do código:
 
 Esse código varia parâmetros utilizados como input na planilha "Hélice B", do professor Alexandre Alho, pra encontrar os sistemas propulsivos com maior eficiência, dentro de certas restrições especificadas.
 
-IMPORTANTE: 
-- (10/05/2024): a verificação da cavitação se restringe a um limite de cavitação de 5% (e não é confiável, já que se baseia em um código não verificado e escrito por outras pessoas
+IMPORTANTE:
+- (10/05/2024): a verificação da cavitação se restringe a um limite de cavitação de 5% (e não é confiável, já que se baseia em um código não verificado escrito por outras pessoas)
 
-- (10/05/2024): os coeficientes de propulsão Kt e Kq calculados no código são ligeiramente diferentes dos da planilha do professor Alho, pois o código não inclui a contribuição de DeltaKT0 e DeltaKQ0 (são valores pequenos e não afetam significativamente o resultado final)
+- (10/05/2024): os coeficientes de propulsão Kt e Kq calculados no código são ligeiramente diferentes dos da planilha do professor Alho, pois o código não inclui a contribuição de DeltaKT0 e DeltaKQ0 (considerados valores pequenos e que não afetam significativamente o resultado final)
 
-Para variar os parâmetros e restrições, altere as variáveis antes da função get_best_propulsion_systems().
+- (06/04/2024): pra gerar um arquivo Excel com os resultados, é necessário ter a biblioteca xlwings instalada. Você pode instalar ela rodando o seguinte comando no seu terminal:
+pip install xlwings
+
+Para variar os parâmetros e restrições, altere as variáveis na seção "USER INPUTS" abaixo.
+
+Pra entender melhor o que signfica cada valor de input, vá para o arquivo shared_types.py e veja a descrição de cada campo.
 '''
+
+########### USER INPUTS ###########
+
+INPUT: Input = {
+    # See shared_types.py for description of each field!
+
+    'environment': {
+        'rho': 1025.9
+    },
+    'ship': {
+        'd': 3.5,
+        'w': 0.277,
+        'Vs': 6.94,
+        'T_required': 43.15,  # 86.3/2
+        'T': 6.3,
+    },
+    'constraints': {
+        'max_number_of_best_propulsion_systems_to_get': -1,  # -1 to get all
+        'must_not_cavitate': False,
+        'min_efficiency': 0,
+        'T_min_%': 0,
+        'T_max_%': 10_000_000,  # 10_000_000 is analogous to infinity
+    },
+    'design_parameters': {
+        'nblades_list': np.arange(start=3, stop=5 + 1, step=1),
+        'rpms_list': np.arange(start=120, stop=200 + 10, step=10),
+        'pds_list': np.arange(start=0.5, stop=1.4 + 0.05, step=0.05),
+        'aeaos_list': np.arange(start=0.5, stop=1.4 + 0.05, step=0.05),
+    }
+}
 
 '''Output type. Choose one of the following:
 Print -> print results to the console
@@ -26,138 +66,108 @@ Excel -> save results to an excel file
 '''
 OUTPUT_TYPE: Literal["print", "excel"] = "excel"
 
-Input = TypedDict('Input', {
-    'd': float,  # m, propeller diameter
-    'w': float,  # coeficiente de esteira (TODO: write name in english)
-    'Vs': float,  # m/s, ship speed
-    'rho': float,  # kg/m^3, fluid density
-    'T_required': float,  # kN, required propeller thrust
-    'Cp': float,  # ship prismatic coefficient
-    'LCB': float,  # m, longitudinal center of buoyancy
-    'T': float,  # m, ship draft
-})
+########### END OF USER INPUTS ###########
 
 
-INPUT: Input = {
-    'd': 3.5,  # m
-    'Vs': 6.94,  # m/s
-    'rho': 1025.9,  # kg/m^3
-    'T_required': 86.3/2,  # kN
-    'Cp': 0.6754,
-    'LCB': 37.398,  # m,
-    'T': 6.3,  # m
-    'w': 0.277,
-}
+def get_best_propulsion_systems(input: Input) -> Output:
+    # Input Constants
+    environment = input['environment']
+    rho = environment['rho']
 
+    # Input Ship parameters
+    ship = input['ship']
+    d = ship['d']
+    Vs = ship['Vs']
+    rho = input['environment']['rho']
+    T_required = ship['T_required']
+    w = ship['w']
+    T = ship['T']
 
-'''Number of best propulsion systems to get. We will get the best N systems, based on efficiency'''
-NUMBER_OF_BEST_PROPULSION_SYSTEMS_TO_GET = 200
-
-'''Minimum efficiency. We won't consider propellers with efficiency below this value'''
-EFFICIENCY_MIN = 0.2
-
-'''Minimum thrust, compared with required. We won't consider propellers with thrust below this value'''
-T_MIN = 1
-
-'''Maximum thrust, compared with required. We won't consider propellers with thrust above this value'''
-T_MAX = 1.5
-
-'''Sequence of number of blades to consider'''
-NBLADES_LIST = np.arange(start=3, stop=5, step=1)  # type: ignore
-
-'''Sequence of rotations (in RPM) to consider'''
-RPMS = np.arange(start=120, stop=200, step=10)  # type: ignore
-
-'''Sequence of pitch/diameter ratios to consider'''
-PDS = np.arange(start=0.5, stop=1.4, step=0.05)  # type: ignore
-
-'''Sequence of area ratios to consider'''
-AEAOS = np.arange(start=0.5, stop=1.4, step=0.05)  # type: ignore
-
-
-def get_best_propulsion_systems() -> Output:
-    d = INPUT['d']
-    Vs = INPUT['Vs']
-    rho = INPUT['rho']
-    T_required = INPUT['T_required']
-    Cp = INPUT['Cp']
-    LCB = INPUT['LCB']
-    w = INPUT['w']
-    T = INPUT['T']
-
+    # Calculated parameters
     Va = Vs * (1-w)  # advance velocity
-    THP = 2*T_required*Va  # total horse power
 
-    output: Output = []
-    for nblades in NBLADES_LIST:
-        for RPM in RPMS:
-            n = RPM/60  # rotation in Hz
-            J = Va / ((RPM/60)*d)  # advance ratio
+    design_parameters = input['design_parameters']
+    constraints = input['constraints']
 
-            for PD in PDS:
-                nRR = 0.9737 + 0.111 * \
-                    (Cp - 0.0225*LCB) - 0.06325*PD  # TODO: what is nRR?
+    unsorted_output: Output = []
 
-                for AeAo in AEAOS:
-                    kt = get_kt(J=J, PD=PD, AeAo=AeAo, nblades=nblades)
+    # All posible combinations of design parameters
+    combinations = itertools.product(
+        # All posible combinations of design parameters
+        design_parameters['nblades_list'],
+        design_parameters['rpms_list'],
+        design_parameters['pds_list'],
+        design_parameters['aeaos_list']
+    )
+    for nblades, RPM, PD, AeAo in combinations:
+        n = RPM/60  # rotation in Hz
+        J = Va / (n*d)  # advance ratio
 
-                    T_delivered = (kt*rho*(n**2)*(d**4))/1000
-                    if T_delivered < T_MIN*T_required or T_delivered > T_MAX*T_required:
-                        continue
+        kt = get_kt(J=J, PD=PD, AeAo=AeAo, nblades=nblades)
+        T_delivered = (kt*rho*(n**2)*(d**4))/1000
 
-                    cavitation_eval = get_cavitation_evaluation(
-                        T=T,
-                        T_delivered=T_delivered,
-                        n=n,
-                        d=d,
-                        AeAo=AeAo,
-                        PD=PD,
-                        Va=Va,
-                        rho=rho
-                    )
-                    # if cavitation_eval == "not ok":
-                    #     continue
+        T_min = T_required * constraints['T_min_%']
+        T_max = T_required * constraints['T_max_%']
+        if T_delivered < T_min or T_delivered > T_max:
+            continue
 
-                    kq = get_kq(J=J, PD=PD, AeAo=AeAo,
-                                nblades=nblades)
+        cavitation_eval = get_cavitation_evaluation(
+            T=T,
+            T_delivered=T_delivered,
+            n=n,
+            d=d,
+            AeAo=AeAo,
+            PD=PD,
+            Va=Va,
+            rho=rho
+        )
 
-                    efficiency = (J*kt)/(2*math.pi*kq)
-                    if efficiency < EFFICIENCY_MIN:
-                        continue
+        if constraints['must_not_cavitate'] and cavitation_eval == "not ok":
+            continue
 
-                    output.append({
-                        'z': nblades,
-                        'N': RPM,
-                        'P/D': PD,
-                        'AeAo': AeAo,
+        kq = get_kq(J=J, PD=PD, AeAo=AeAo,
+                    nblades=nblades)
 
-                        'J0': J,
-                        'Va': Va,
+        efficiency = (J*kt)/(2*math.pi*kq)
+        if efficiency < constraints['min_efficiency']:
+            continue
 
-                        'Kt0': kt,
-                        'T0': T_delivered,
+        unsorted_output.append({
+            'z': nblades,
+            'N': RPM,
+            'P/D': PD,
+            'AeAo': AeAo,
 
-                        'Kq0': kq,
-                        'Q0': kq*rho*(n**2)*(d**5) / 1000,
+            'J0': J,
+            'Va': Va,
 
-                        'efficiency': efficiency,
-                        'DHP': THP/(nRR*efficiency),
+            'Kt0': kt,
+            'T0': T_delivered,
 
-                        'cavitation_eval': cavitation_eval,
-                    })
+            'Kq0': kq,
+            'Q0': kq*rho*(n**2)*(d**5) / 1000,
+
+            'efficiency': efficiency,
+            'cavitation_eval': cavitation_eval,
+        })
 
     return sorted(
-        output,
-        key=lambda PD: PD['efficiency'],
+        unsorted_output,
+        key=lambda item: item['efficiency'],
         reverse=True
-    )[: NUMBER_OF_BEST_PROPULSION_SYSTEMS_TO_GET]
+    )[: constraints['max_number_of_best_propulsion_systems_to_get']]
 
 
-output = get_best_propulsion_systems()
+output = get_best_propulsion_systems(input=INPUT)
+
+run: Run = {
+    'input': INPUT,
+    'output': output
+}
 
 if OUTPUT_TYPE == "print":  # type: ignore
-    pretty_print(output)
+    pretty_print(run)
 elif OUTPUT_TYPE == "excel":  # type: ignore
-    save_to_excel(output)
+    save_to_excel(run)
 else:
     raise ValueError(f"Invalid OUTPUT_TYPE: {OUTPUT_TYPE}")

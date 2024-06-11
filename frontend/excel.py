@@ -95,9 +95,9 @@ def _write_output_sht(sht: xw.Sheet, output: Output):
 
     last_row = len(output) + 1
 
-    all_range = f'A1:M{last_row}'
-    headers_range = 'A1:M1'
-    data_range = f'A2:M{last_row}'
+    all_range = f'A1:L{last_row}'
+    headers_range = 'A1:L1'
+    data_range = f'A2:L{last_row}'
 
     # Format of cells
     sht.range(data_range).number_format = '0.00'

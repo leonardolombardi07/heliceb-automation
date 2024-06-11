@@ -3,6 +3,7 @@ import math
 import numpy as np
 from typing import Literal
 import itertools
+from functools import reduce
 
 # Internal imports
 from shared_types import Run, Input, Output
@@ -20,43 +21,39 @@ Esse código varia parâmetros utilizados como input na planilha "Hélice B", do
 IMPORTANTE:
 - (10/05/2024): a verificação da cavitação se restringe a um limite de cavitação de 5% (e não é confiável, já que se baseia em um código não verificado escrito por outras pessoas)
 
-- (10/05/2024): os coeficientes de propulsão Kt e Kq calculados no código são ligeiramente diferentes dos da planilha do professor Alho, pois o código não inclui a contribuição de DeltaKT0 e DeltaKQ0 (considerados valores pequenos e que não afetam significativamente o resultado final)
+- (10/05/2024): os coeficientes de propulsão Kt e Kq calculados no código são ligeiramente diferentes dos da planilha do professor Alho, pois o código não inclui a contribuição de DeltaKT0 e DeltaKQ0 (considerados, para os fins desse programa, valores pequenos que não afetam significativamente o resultado final)
 
 - (06/04/2024): pra gerar um arquivo Excel com os resultados, é necessário ter a biblioteca xlwings instalada. Você pode instalar ela rodando o seguinte comando no seu terminal:
 pip install xlwings
 
 Para variar os parâmetros e restrições, altere as variáveis na seção "USER INPUTS" abaixo.
-
-Pra entender melhor o que signfica cada valor de input, vá para o arquivo shared_types.py e veja a descrição de cada campo.
 '''
 
 ########### USER INPUTS ###########
 
 INPUT: Input = {
-    # See shared_types.py for description of each field!
-
     'environment': {
-        'rho': 1025.9
+        'rho': 1025.9,  # water density, kg/m^3
     },
     'ship': {
-        'd': 3.5,
-        'w': 0.277,
-        'Vs': 6.94,
-        'T_required': 43.15,  # 86.3/2
-        'T': 6.3,
+        'd': 4,  # propeller diameter, m
+        'w': 0.139,  # coeficiente de esteira
+        'Vs': 6.945,  # 13.5 knots # ship service speed, m/s
+        'T_required': 117.25,  # required thrust, kN
+        'T': 6,  # ship draft, m
     },
     'constraints': {
-        'max_number_of_best_propulsion_systems_to_get': -1,  # -1 to get all
-        'must_not_cavitate': False,
-        'min_efficiency': 0,
-        'T_min_%': 0,
+        'max_number_of_best_propulsion_systems_to_get': -1,  # -1 to get all systems
+        'must_not_cavitate': False,  # True to exclude systems that cavitate
+        'min_efficiency': 0,  # minimum efficiency of the propulsion system
+        'T_min_%': 1,  # equal to 100% of T_required
         'T_max_%': 10_000_000,  # 10_000_000 is analogous to infinity
     },
     'design_parameters': {
         'nblades_list': np.arange(start=3, stop=5 + 1, step=1),
         'rpms_list': np.arange(start=120, stop=200 + 10, step=10),
-        'pds_list': np.arange(start=0.5, stop=1.4 + 0.05, step=0.05),
-        'aeaos_list': np.arange(start=0.5, stop=1.4 + 0.05, step=0.05),
+        'pds_list': np.arange(start=0.5, stop=1.5 + 0.05, step=0.05),
+        'aeaos_list': np.arange(start=0.3, stop=1.1 + 0.05, step=0.05),
     }
 }
 
@@ -70,15 +67,17 @@ OUTPUT_TYPE: Literal["print", "excel"] = "excel"
 
 
 def get_best_propulsion_systems(input: Input) -> Output:
-    # Input Constants
+    design_parameters = input['design_parameters']
+    constraints = input['constraints']
+
+    # Environment parameters
     environment = input['environment']
     rho = environment['rho']
 
-    # Input Ship parameters
+    # Ship parameters
     ship = input['ship']
     d = ship['d']
     Vs = ship['Vs']
-    rho = input['environment']['rho']
     T_required = ship['T_required']
     w = ship['w']
     T = ship['T']
@@ -86,19 +85,26 @@ def get_best_propulsion_systems(input: Input) -> Output:
     # Calculated parameters
     Va = Vs * (1-w)  # advance velocity
 
-    design_parameters = input['design_parameters']
-    constraints = input['constraints']
+    combinations_len = reduce(
+        #  Using len(list(combinations)) will consume the iterator
+        lambda x, y: x*y,
+        map(len, design_parameters.values())  # type: ignore
+    )
+
+    # User can see on output up the number of best propulsion systems he wants
+    constraints["max_number_of_best_propulsion_systems_to_get"] = combinations_len if constraints["max_number_of_best_propulsion_systems_to_get"] == - \
+        1 else constraints["max_number_of_best_propulsion_systems_to_get"]
 
     unsorted_output: Output = []
-
-    # All posible combinations of design parameters
     combinations = itertools.product(
         # All posible combinations of design parameters
+        # TODO: somehow use something like itertools.product(*design_parameters.values()), but in a clear and type safe way
         design_parameters['nblades_list'],
         design_parameters['rpms_list'],
         design_parameters['pds_list'],
         design_parameters['aeaos_list']
     )
+
     for nblades, RPM, PD, AeAo in combinations:
         n = RPM/60  # rotation in Hz
         J = Va / (n*d)  # advance ratio

@@ -1,6 +1,5 @@
 # External imports
 import math
-import numpy as np
 from typing import Literal
 import itertools
 from functools import reduce
@@ -11,6 +10,7 @@ from kt import get_kt
 from kq import get_kq
 from cavitation import get_cavitation_evaluation
 from frontend import pretty_print, save_to_excel
+from utils import np_arange_with_end_limit
 
 
 '''Leo: (10/05/2024)
@@ -50,10 +50,10 @@ INPUT: Input = {
         'T_max_%': 10_000_000,  # 10_000_000 is analogous to infinity
     },
     'design_parameters': {
-        'nblades_list': np.arange(start=3, stop=5 + 1, step=1),
-        'rpms_list': np.arange(start=120, stop=200 + 10, step=10),
-        'pds_list': np.arange(start=0.5, stop=1.5 + 0.05, step=0.05),
-        'aeaos_list': np.arange(start=0.3, stop=1.1 + 0.05, step=0.05),
+        'nblades_list': np_arange_with_end_limit(start=3, stop=5, step=1),
+        'rpms_list': np_arange_with_end_limit(start=120, stop=200, step=10),
+        'pds_list': np_arange_with_end_limit(start=0.5, stop=1.5, step=0.05),
+        'aeaos_list': np_arange_with_end_limit(start=0.3, stop=1.1, step=0.05),
     }
 }
 

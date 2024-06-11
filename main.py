@@ -43,10 +43,10 @@ INPUT: Input = {
         'T': 6,  # ship draft, m
     },
     'constraints': {
-        'max_number_of_best_propulsion_systems_to_get': -1,  # -1 to get all systems
+        'max_number_of_outputed_systems': -1,  # -1 to get all systems
         'must_not_cavitate': False,  # True to exclude systems that cavitate
         'min_efficiency': 0,  # minimum efficiency of the propulsion system
-        'T_min_%': 1,  # equal to 100% of T_required
+        'T_min_%': 1,  # 1 equals to 100% of T_required
         'T_max_%': 10_000_000,  # 10_000_000 is analogous to infinity
     },
     'design_parameters': {
@@ -68,7 +68,10 @@ OUTPUT_TYPE: Literal["print", "excel"] = "excel"
 
 def get_best_propulsion_systems(input: Input) -> Output:
     design_parameters = input['design_parameters']
+
+    # Constraints
     constraints = input['constraints']
+    max_number_of_outputed_systems = constraints['max_number_of_outputed_systems']
 
     # Environment parameters
     environment = input['environment']
@@ -92,8 +95,8 @@ def get_best_propulsion_systems(input: Input) -> Output:
     )
 
     # User can see on output up the number of best propulsion systems he wants
-    constraints["max_number_of_best_propulsion_systems_to_get"] = combinations_len if constraints["max_number_of_best_propulsion_systems_to_get"] == - \
-        1 else constraints["max_number_of_best_propulsion_systems_to_get"]
+    constraints['max_number_of_outputed_systems'] = combinations_len if max_number_of_outputed_systems == - \
+        1 else max_number_of_outputed_systems
 
     unsorted_output: Output = []
     combinations = itertools.product(
@@ -161,7 +164,7 @@ def get_best_propulsion_systems(input: Input) -> Output:
         unsorted_output,
         key=lambda item: item['efficiency'],
         reverse=True
-    )[: constraints['max_number_of_best_propulsion_systems_to_get']]
+    )[:constraints['max_number_of_outputed_systems']]
 
 
 output = get_best_propulsion_systems(input=INPUT)

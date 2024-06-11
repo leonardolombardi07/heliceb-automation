@@ -27,9 +27,9 @@ def _write_input_sht(sht: xw.Sheet, input: Input):
     sht.range('B9').value = input['ship']['T']
 
     sht.range('A11').value = 'Constraints'
-    sht.range('A12').value = 'max_number_of_best_propulsion_systems_to_get'
+    sht.range('A12').value = 'max_number_of_outputed_systems'
     sht.range(
-        'B12').value = input['constraints']['max_number_of_best_propulsion_systems_to_get']
+        'B12').value = input['constraints']['max_number_of_outputed_systems']
     sht.range('A13').value = 'must_not_cavitate'
     sht.range('B13').value = input['constraints']['must_not_cavitate']
     sht.range('A14').value = 'min_efficiency'

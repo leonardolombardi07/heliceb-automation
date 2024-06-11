@@ -15,8 +15,8 @@ ShipInput = TypedDict('ShipInput', {
 })
 
 ConstraintsInput = TypedDict('ConstraintsInput', {
-    # Maximum number of best propulsion systems to get. -1 means get all possible propulsion systems
-    'max_number_of_best_propulsion_systems_to_get': int,
+    # Number of propulsion systems to get. -1 means get all possible propulsion systems
+    'max_number_of_outputed_systems': int,
 
     # Minimum efficiency. We won't consider propellers with efficiency below this value
     'min_efficiency': float,

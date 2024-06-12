@@ -1,10 +1,39 @@
-def get_kq(
+# External imports
+from math import log10
+
+
+def _get_delta_kq(
+    J: float,
+    PD: float,
+    AeAo: float,
+    nblades: int,
+    Re: float,
+):
+    c = (log10(Re) - 0.301)
+
+    a1 = -0.000591412
+    a2 = +0.00696898 * PD
+    a3 = -0.0000666654 * nblades * (PD**6)
+    a4 = +0.0160818 * (AeAo**2)
+    a5 = -0.000938091 * c * PD
+    a6 = -0.00059593 * c * (PD**2)
+    a7 = +0.0000782099 * (c**2) * (PD**2)
+    a8 = +0.0000052199 * c * nblades * AeAo * (J**2)
+    a9 = -0.00000088528 * (c**2) * nblades * AeAo * PD * J
+    a10 = +0.0000230171 * c * nblades * (PD**6)
+    a11 = -0.00000184341 * (c**2) * nblades * (PD**6)
+    a12 = -0.00400252 * c * (AeAo**2)
+    a13 = +0.000220915 * (c**2) * (AeAo**2)
+
+    return a1+a2+a3+a4+a5+a6+a7+a8+a9+a10+a11+a12+a13
+
+
+def _get_kq(
         J: float,
         PD: float,
         AeAo: float,
-        nblades: int
+        nblades: int,
 ) -> float:
-    # TODO: we should include DeltaKQ0, but the difference is negligible for the purpose of this code
     b1 = 0.0037936800*1*1*1*1
     b2 = 0.0088652300*(J**2)*1*1*1
     b3 = -0.0322410000*J*PD*1*1
@@ -61,3 +90,19 @@ def get_kq(
         b25+b26+b27+b28+b29+b30+b31+b32+b33+b34+b35+b36 + \
         b37+b38+b39+b40+b41+b42+b43+b44+b45+b46+b47
     return kq
+
+
+def get_corrected_kq(
+        J: float,
+        PD: float,
+        AeAo: float,
+        nblades: int,
+        Re: float,
+) -> float:
+    kq = _get_kq(J=J, PD=PD, AeAo=AeAo, nblades=nblades)
+    delta_kq = _get_delta_kq(J=J, PD=PD, AeAo=AeAo,
+                             nblades=nblades, Re=Re)
+
+    # Theoretically, we should add delta_kq only if Re > 2*(10**6)
+    # However, it seems that the spreadsheet adds it regardless of the Re value
+    return kq + delta_kq

@@ -1,10 +1,40 @@
-def get_kt(
+# External imports
+from math import log10
+
+
+def _get_delta_kt(
     J: float,
     PD: float,
     AeAo: float,
-    nblades: int
+    nblades: int,
+    Re: float,
 ) -> float:
-    # TODO: we should include DeltaKT0, but the difference is negligible for the purpose of this code
+    c = (log10(Re) - 0.301)
+
+    a1 = 0.000353485
+    a2 = -0.00333758 * AeAo * (J**2)
+    a3 = -0.00478125 * AeAo * PD * J
+    a4 = +0.000257792 * (c**2) * AeAo * (J**2)
+    a5 = +0.0000643192 * c * (PD**6) * (J**2)
+    a6 = -0.0000110636 * (c**2) * (PD**6) * (J**2)
+    a7 = -0.0000276305 * (c**2) * nblades * AeAo * (J ** 2)
+    a8 = +0.0000954 * c * nblades * AeAo * PD * J
+
+    # Heads up! Alho's spreadsheet is wrong here
+    # It considers c**2 instead of c
+    # To keep the same result, we consider c**2 as well
+    wrong_c_for_a9 = c**2
+    a9 = +0.0000032049 * wrong_c_for_a9 * (nblades**2) * AeAo * (PD**3) * J
+
+    return a1+a2+a3+a4+a5+a6+a7+a8+a9
+
+
+def _get_kt(
+    J: float,
+    PD: float,
+    AeAo: float,
+    nblades: int,
+) -> float:
     a1 = (0.00880496000)*1*1*1*1
     a2 = -0.20455400000*J*1*1*1
     a3 = 0.16635100000*PD*1*1*1
@@ -48,3 +78,19 @@ def get_kt(
     kt = a1+a2+a3+a4+a5+a6+a7+a8+a9+a10+a11+a12+a13+a14+a15+a16+a17+a18+a19+a20 + \
         a21+a22+a23+a24+a25+a26+a27+a28+a29+a30+a31+a32+a33+a34+a35+a36+a37+a38+a39
     return kt
+
+
+def get_corrected_kt(
+        J: float,
+        PD: float,
+        AeAo: float,
+        nblades: int,
+        Re: float,
+) -> float:
+    kt = _get_kt(J=J, PD=PD, AeAo=AeAo, nblades=nblades)
+    delta_kt = _get_delta_kt(J=J, PD=PD, AeAo=AeAo,
+                             nblades=nblades, Re=Re)
+
+    # Theoretically, we should add delta_kt only if Re > 2*(10**6)
+    # However, it seems that the spreadsheet adds it regardless of the Re value
+    return kt + delta_kt

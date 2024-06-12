@@ -5,6 +5,10 @@ import numpy as np
 
 EnvironmentInput = TypedDict('EnvironmentInput', {
     'rho': float,  # kg/m^3, fluid density
+    'v': float,  # m^2/s, fluid kinematic viscosity
+    'g': float,  # m/s^2, acceleration of gravity
+    'Pa': float,  # Pa, atmospheric pressure
+    'Ps': float,  # Pa, saturation pressure of water
 })
 
 ShipInput = TypedDict('ShipInput', {
@@ -12,7 +16,7 @@ ShipInput = TypedDict('ShipInput', {
     'w': float,  # coeficiente de esteira (TODO: write name in english)
     'Vs': float,  # m/s, ship speed
     'T_required': float,  # kN, required propeller thrust
-    'T': float,  # m, ship draft
+    'T': float,  # m, ship draft at front perpendicular
 })
 
 ConstraintsInput = TypedDict('ConstraintsInput', {
@@ -30,22 +34,26 @@ ConstraintsInput = TypedDict('ConstraintsInput', {
 
     # Maximum thrust, as percentage, compared with required. We won't consider propellers with thrust above this value
     'T_max_%': float,
+
+    # Cavitation limit. Example: use 0.05 for 5% of cavitation limit
+    'cavitation_limit': float,
 })
 
-ListLike = Union[Sequence[int], np.ndarray[Any, Any]]
+IntListLike = Union[Sequence[int], np.ndarray[Any, Any]]
+FloatListLike = Union[Sequence[float], np.ndarray[Any, Any]]
 
 DesignParameters = TypedDict('DesignParameters', {
     # Sequence of number of blades to consider
-    'nblades_list': ListLike,
+    'nblades_list': IntListLike,
 
     # Sequence of rotations (in RPM) to consider
-    'rpms_list': ListLike,
+    'rpms_list': FloatListLike,
 
     # Sequence of pitch/diameter ratios to consider
-    'pds_list': ListLike,
+    'pds_list': FloatListLike,
 
     # Sequence of area ratios to consider
-    'aeaos_list': ListLike,
+    'aeaos_list': FloatListLike,
 })
 
 Input = TypedDict('Input', {
@@ -58,7 +66,7 @@ Input = TypedDict('Input', {
 OutputedPropulsionSystem = TypedDict('OutputedPropulsionSystem', {
     # Inputs on Alho's spreadsheet
     'z': int,  # number of blades
-    'N': int,  # rpm, rotation
+    'N': float,  # rpm, rotation
     'P/D': float,  # pitch/diameter ratio
     'AeAo': float,  # area ratio
 
@@ -73,7 +81,9 @@ OutputedPropulsionSystem = TypedDict('OutputedPropulsionSystem', {
     'Q0': float,  # kN.m, propeller torque
 
     'efficiency': float,  # propeller efficiency
-    'cavitation_eval': Literal['ok', 'not ok'],
+    'DHP': float,  # delivered horsepower
+
+    'cavitation_eval': Literal['ok', 'not ok'],  # cavitation evaluation
 })
 
 Output = Sequence[OutputedPropulsionSystem]

@@ -67,6 +67,8 @@ INPUT: Input = {
         'cavitation_limit': 0.05,  # limite de cavitação
     },
     'design_parameters': {
+        # Você pode usar listas normais aqui, tipo [3, 4, 5], mas np_arange_including_stop é mais prático
+
         # lista de número de pás (exemplo: [3, 4, 5])
         'nblades_list': np_arange_including_stop(start=3, stop=5, step=1),
         # lista de rotações (RPM) (exemplo: [120, 130, 140, ..., 200])

@@ -28,6 +28,7 @@ Você pode instalar ela rodando o seguinte comando no seu terminal:
 pip install xlwings
 '''
 
+
 ########### INPUTS DO USUÁRIO ###########
 
 '''Tipo de output. Selecionar entre:
@@ -76,6 +77,7 @@ INPUT: Input = {
         'aeaos_list': np_arange_including_stop(start=0.3, stop=1.1, step=0.05),
     }
 }
+
 
 ########### FINAL DE INPUTS DO USUÁRIO ###########
 

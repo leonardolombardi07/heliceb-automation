@@ -81,6 +81,7 @@ INPUT: Input = {
 
 
 def get_best_propulsion_systems(input: Input) -> Output:
+    # Design parameters
     design_parameters = input['design_parameters']
 
     # Constraints

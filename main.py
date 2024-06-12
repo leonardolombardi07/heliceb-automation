@@ -38,7 +38,7 @@ None -> não faz nada. Útil para testar o código sem printar ou salvar os resu
 OUTPUT_TYPE: Union[
     Literal['print', 'excel'],
     None
-] = "print"  # <- Alterar aqui
+] = "excel"  # <- Alterar aqui
 
 
 INPUT: Input = {

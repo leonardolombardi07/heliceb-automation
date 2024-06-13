@@ -75,7 +75,9 @@ def _run_tests():
     for i, input in enumerate(prop_systems):
         print(f'Running test for prop {i+1} system...')
         _print_prop_system_input(input)
-        _run_test_for_single_prop_system(input=input)
+        _check_if_alho_spreadsheet_output_is_close_enough_to_software_output(
+            input=input
+        )
         print("\n")
 
     print('All tests passed!')
@@ -181,22 +183,22 @@ def _assert_numbers_are_close_enough(key: str, wb_num: float, num: float, relati
     '''
 
 
-def _run_test_for_single_prop_system(input: Input):
+def _check_if_alho_spreadsheet_output_is_close_enough_to_software_output(input: Input):
     assert all([
         len(cast(List[Any], num)) == 1 for num in input['design_parameters'].values()
     ]), f'Test only works for an input of a single prop system. Input: {input}'
 
-    my_software_output_prop_system = get_sorted_propulsion_systems(input=input)[
+    software_output_prop_system = get_sorted_propulsion_systems(input=input)[
         0]
     alho_output_prop_system = _get_outputed_system_from_Alho_workbook(
         input=input)
 
-    for key, val in my_software_output_prop_system.items():
+    for key, val in software_output_prop_system.items():
         if key == 'cavitation_eval':
             alho_val = 'ok' if alho_output_prop_system[key] == 'ok' else 'not ok'
-            assert my_software_output_prop_system[key] == alho_val, f'''
+            assert software_output_prop_system[key] == alho_val, f'''
             Error on key "{key}"
-            Value on Software: {my_software_output_prop_system[key]},
+            Value on Software: {software_output_prop_system[key]},
             Value on Spreadsheet: {alho_output_prop_system[key]}
             '''
 

@@ -14,7 +14,7 @@ from get_sorted_propulsion_systems import get_sorted_propulsion_systems
 
 
 # Workbook related constants
-ALHO_WORKBOOK = xw.books.open(  # type: ignore
+ALHO_WORKBOOK = xw.Book(  # type: ignore
     f'{CURRENT_DIRECTORY}/PSM (EEN554) - HéliceB (Versão 2021).xlsm')
 PRINCIPAL_SHEET = ALHO_WORKBOOK.sheets['Principal']  # type: ignore
 ALHO_WORKBOOK_EXECUTAR_MACRO_NAME = 'Executar'

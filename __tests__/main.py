@@ -74,7 +74,7 @@ def _run_tests():
 
     for i, input in enumerate(prop_systems_to_test):
         print(f'Running test for prop {i+1} system...')
-        _print_prop_system_input(input)
+        _print_prop_system_input(input=input)
         _check_if_alho_spreadsheet_output_is_close_enough_to_software_output(
             input=input
         )

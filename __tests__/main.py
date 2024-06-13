@@ -60,7 +60,7 @@ def _run_tests():
     print("\n")
 
     # Edit here the kind of prop systems you want to test
-    prop_systems = [
+    prop_systems_to_test = [
         _create_prop_system_input(
             nblades=3, rpms=120, pds=0.95, aeaos=0.3
         ),
@@ -72,7 +72,7 @@ def _run_tests():
         ),
     ]
 
-    for i, input in enumerate(prop_systems):
+    for i, input in enumerate(prop_systems_to_test):
         print(f'Running test for prop {i+1} system...')
         _print_prop_system_input(input)
         _check_if_alho_spreadsheet_output_is_close_enough_to_software_output(
@@ -81,6 +81,9 @@ def _run_tests():
         print("\n")
 
     print('All tests passed!')
+
+
+######### Helper functions #########
 
 
 def _create_prop_system_input(nblades: int, rpms: int, pds: float, aeaos: float) -> Input:

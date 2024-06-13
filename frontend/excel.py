@@ -61,7 +61,7 @@ def _write_input_sht(sht: xw.Sheet, input: Input):
     sht.range(f'B{row}').value = input['ship']['T_required']
 
     row += 1
-    sht.range(f'A{row}').value = 'T [kN]'
+    sht.range(f'A{row}').value = 'T [m]'
     sht.range(f'B{row}').value = input['ship']['T']
 
     # Constraints

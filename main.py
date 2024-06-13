@@ -45,11 +45,11 @@ INPUT: Input = {
         'Ps': 1705.1,  # pressão de saturação da água, Pa
     },
     'ship': {
-        'd': 4,  # diâmetro do propulsor, m
-        'w': 0.139,  # coeficiente de esteira
-        'Vs': 6.945,  # velocidade de serviço do navio, m/s
-        'T_required': 117.25,  # empuxo requerido, kN
-        'T': 6,  # calado do navio na perpendicular de vante, m
+        'd': 3.5,  # diâmetro do propulsor, m
+        'w': 0.277,  # coeficiente de esteira
+        'Vs': 5.66,  # velocidade de serviço do navio, m/s
+        'T_required': 43.15,  # empuxo requerido, kN
+        'T': 6.3,  # calado do navio na perpendicular de vante, m
     },
     'constraints': {
         # -1 significa que todos os sistemas serão retornados
@@ -69,9 +69,9 @@ INPUT: Input = {
         # lista de rotações (RPM) (exemplo: [120, 130, 140, ..., 200])
         'rpms_list': np_arange_including_stop(start=120, stop=200, step=10),
         # lista de razões P/D (exemplo: [0.5, 0.55, 0.6, ..., 1.5])
-        'pds_list': np_arange_including_stop(start=0.5, stop=1.5, step=0.05),
+        'pds_list': np_arange_including_stop(start=0.5, stop=1.4, step=0.05),
         # lista de razões de área Ae/Ao (exemplo: [0.3, 0.35, 0.4, ..., 1.1])
-        'aeaos_list': np_arange_including_stop(start=0.3, stop=1.1, step=0.05),
+        'aeaos_list': np_arange_including_stop(start=0.5, stop=1.4, step=0.05),
     }
 }
 

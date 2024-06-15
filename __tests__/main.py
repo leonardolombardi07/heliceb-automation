@@ -185,11 +185,9 @@ def _assert_numbers_are_close_enough(key: str, wb_num: float, num: float, relati
 
     if wb_num == 0:
         # Use num as reference. Better than nothing...
-        relative_percentual_discrepancy = abs(wb_num - num) / num
-
+        relative_percentual_discrepancy = abs((wb_num - num)/num)
     else:
-        relative_percentual_discrepancy = abs(
-            wb_num - num) / wb_num
+        relative_percentual_discrepancy = abs((wb_num - num) / wb_num)
 
     assert relative_percentual_discrepancy <= relative_percentual_discrep_tol, f'''
     Error on key "{key}"

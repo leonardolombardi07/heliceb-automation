@@ -149,7 +149,8 @@ def _get_outputed_system_from_Alho_workbook(input: Input) -> OutputedPropulsionS
     _input_data_on_Alho_workbook(input)
 
     # Execute macro
-    ALHO_WORKBOOK.macro(ALHO_WORKBOOK_EXECUTAR_MACRO_NAME).run()
+    ALHO_WORKBOOK.macro(
+        ALHO_WORKBOOK_EXECUTAR_MACRO_NAME).run()  # type: ignore
 
     # Get output data
     return {
@@ -157,6 +158,10 @@ def _get_outputed_system_from_Alho_workbook(input: Input) -> OutputedPropulsionS
         'N': PRINCIPAL_SHEET.range('F13').value,
         'P/D': PRINCIPAL_SHEET.range('F14').value,
         'AeAo': PRINCIPAL_SHEET.range('F15').value,
+        'd': PRINCIPAL_SHEET.range('F12').value,
+        'w': PRINCIPAL_SHEET.range('N11').value,
+        'Vs': PRINCIPAL_SHEET.range('J12').value,
+        'T': PRINCIPAL_SHEET.range('J14').value,
 
         'J0': PRINCIPAL_SHEET.range('K23').value,
         'Va': PRINCIPAL_SHEET.range('K24').value,
@@ -218,9 +223,10 @@ def _check_if_alho_spreadsheet_output_is_close_enough_to_software_output(input: 
             '''
 
         elif isinstance(val, int) or isinstance(val, float):
+            wb_num = cast(float, alho_output_prop_system[key])
             _assert_numbers_are_close_enough(
                 key=key,
-                wb_num=val,
+                wb_num=wb_num,
                 num=val,
                 relative_percentual_discrep_tol=MAX_RELATIVE_PERCENTUAL_DISCREPANCY
             )

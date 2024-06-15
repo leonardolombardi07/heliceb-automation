@@ -77,6 +77,7 @@ INPUT: Input = {
     }
 }
 
+########### FIM DOS INPUTS DO USUÁRIO ###########
 
 if __name__ == '__main__':
     output = get_sorted_propulsion_systems(input=INPUT)

@@ -50,8 +50,8 @@ INPUT: Input = {
         'max_number_of_outputed_systems': -1,
         'must_not_cavitate': False,  # se True, só retornará propulsores que não cavitam
         'min_efficiency': 0,  # eficiência mínima do propulsor
-        'T_delivered_min': 43.15,  # Mínimo empuxo requerido
-        # Máximo empuxo requerido. float('inf') significa que não há limite
+        'T_delivered_min': 43.15,  # Mínimo empuxo requerido, kN
+        # Máximo empuxo requerido, kN. float('inf') significa que não há limite
         'T_delivered_max': float('inf'),
         'cavitation_limit': 0.05,  # limite de cavitação
     },

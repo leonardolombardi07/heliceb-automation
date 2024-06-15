@@ -21,10 +21,10 @@ ConstraintsInput = TypedDict('ConstraintsInput', {
     # If True, propellers that may cavitate will be excluded
     'must_not_cavitate': bool,
 
-    # Minimum delivered thrust
+    # Minimum delivered thrust, in kN
     'T_delivered_min': float,
 
-    # Maximum delivered thrust
+    # Maximum delivered thrust, in kN. float('inf') means no limit
     'T_delivered_max': float,
 
     # Cavitation limit. Example: use 0.05 for 5% of cavitation limit
@@ -78,7 +78,7 @@ OutputedPropulsionSystem = TypedDict('OutputedPropulsionSystem', {
     'T': float,  # m, ship draft
 
     # Outputs on Alho's spreadsheet
-    'J0': float,  # advance ratio,
+    'J0': float,  # advance ratio
     'Va': float,  # m/s, advance velocity
 
     'Kt0': float,  # thrust coefficient

@@ -3,10 +3,11 @@
 
 # External imports
 import xlwings as xw
-from shared_types import Run, Input, Output
+from datetime import datetime
+from typing import List
 
 # Internal imports
-from datetime import datetime
+from shared_types import Run, Input, Output
 
 
 def _write_input_sht(sht: xw.Sheet, input: Input):
@@ -19,105 +20,33 @@ def _write_input_sht(sht: xw.Sheet, input: Input):
     sht.range(f'A{row}').value = 'Environment'
     sht.range(f'A{row}:B{row}').merge()
 
-    row += 1
-    sht.range(f'A{row}').value = 'rho [kg/m³]'
-    sht.range(f'B{row}').value = input['environment']['rho']
-
-    row += 1
-    sht.range(f'A{row}').value = 'v [m²/s]'
-    sht.range(f'B{row}').value = input['environment']['v']
-
-    row += 1
-    sht.range(f'A{row}').value = 'g [m/s²]'
-    sht.range(f'B{row}').value = input['environment']['g']
-
-    row += 1
-    sht.range(f'A{row}').value = 'Pa [Pa]'
-    sht.range(f'B{row}').value = input['environment']['Pa']
-
-    row += 1
-    sht.range(f'A{row}').value = 'Ps [Pa]'
-    sht.range(f'B{row}').value = input['environment']['Ps']
-
-    # Ship
-    row += 1
-    sht.range(f'A{row}').value = 'Ship'
-    sht.range(f'A{row}:B{row}').merge()
-
-    row += 1
-    sht.range(f'A{row}').value = 'd [m]'
-    sht.range(f'B{row}').value = input['ship']['d']
-
-    row += 1
-    sht.range(f'A{row}').value = 'w'
-    sht.range(f'B{row}').value = input['ship']['w']
-
-    row += 1
-    sht.range(f'A{row}').value = 'Vs [m/s]'
-    sht.range(f'B{row}').value = input['ship']['Vs']
-
-    row += 1
-    sht.range(f'A{row}').value = 'T_required [kN]'
-    sht.range(f'B{row}').value = input['ship']['T_required']
-
-    row += 1
-    sht.range(f'A{row}').value = 'T [m]'
-    sht.range(f'B{row}').value = input['ship']['T']
+    for key, value in input['environment'].items():
+        row += 1
+        sht.range(f'A{row}').value = key
+        sht.range(f'B{row}').value = value
 
     # Constraints
     row += 1
     sht.range(f'A{row}').value = 'Constraints'
     sht.range(f'A{row}:B{row}').merge()
 
-    row += 1
-    sht.range(f'A{row}').value = 'max_number_of_outputed_systems'
-    sht.range(
-        f'B{row}').value = input['constraints']['max_number_of_outputed_systems']
+    for key, value in input['constraints'].items():
+        row += 1
+        sht.range(f'A{row}').value = key
+        sht.range(f'B{row}').value = value
 
-    row += 1
-    sht.range(f'A{row}').value = 'must_not_cavitate'
-    sht.range(f'B{row}').value = input['constraints']['must_not_cavitate']
-
-    row += 1
-    sht.range(f'A{row}').value = 'min_efficiency'
-    sht.range(f'B{row}').value = input['constraints']['min_efficiency']
-
-    row += 1
-    sht.range(f'A{row}').value = 'T_min_%'
-    sht.range(f'B{row}').value = input['constraints']['T_min_%']
-
-    row += 1
-    sht.range(f'A{row}').value = 'T_max_%'
-    sht.range(f'B{row}').value = input['constraints']['T_max_%']
-
-    row += 1
-    sht.range(f'A{row}').value = 'cavitation_limit'
-    sht.range(f'B{row}').value = input['constraints']['cavitation_limit']
-
-    # Design Parameter
+    # Design Parameters
     row += 1
     sht.range(f'A{row}').value = 'Design Parameters'
     sht.range(f'A{row}:B{row}').merge()
 
-    row += 1
-    sht.range(f'A{row}').value = 'nblades_list'
-    sht.range(f'B{row}').value = ', '.join(
-        map(str, input['design_parameters']['nblades_list']))
+    def _list_as_str(lst: List[any]):
+        return ', '.join(map(str, lst))
 
-    row += 1
-    sht.range(f'A{row}').value = 'rpms_list'
-    sht.range(f'B{row}').value = ', '.join(
-        map(str, input['design_parameters']['rpms_list']))
-
-    row += 1
-    sht.range(f'A{row}').value = 'pds_list'
-    sht.range(f'B{row}').value = ', '.join(
-        map(str, input['design_parameters']['pds_list']))
-
-    row += 1
-    sht.range(f'A{row}').value = 'aeaos_list'
-    sht.range(f'B{row}').value = ', '.join(
-        map(str, input['design_parameters']['aeaos_list']))
+    for key, value in input['design_parameters'].items():
+        row += 1
+        sht.range(f'A{row}').value = key
+        sht.range(f'B{row}').value = _list_as_str(value)
 
     all_range = f'A1:B{row}'
 
@@ -138,44 +67,52 @@ def _write_output_sht(sht: xw.Sheet, output: Output):
     sht.range('B1').value = 'Rotação (N) [rpm]'
     sht.range('C1').value = 'Razão de Passo (P/D)'
     sht.range('D1').value = 'Razão de Área (Ae/Ao)'
-    sht.range('E1').value = 'Coef. Avanço (J0)'
-    sht.range('F1').value = 'Velocidade de Avanço (Va) [m/s]'
-    sht.range('G1').value = 'Coeficiente de Empuxo (Kt0)'
-    sht.range('H1').value = 'Empuxo (T0) [kN]'
-    sht.range('I1').value = 'Coeficiente de Torque (Kq0)'
-    sht.range('J1').value = 'Torque (Q0) [kN.m]'
-    sht.range('K1').value = 'Eficiência (n0 x nrr)'
-    sht.range('L1').value = 'Potência (DHP) [kW]'
-    sht.range('M1').value = 'Cavitação'
+    sht.range('E1').value = 'Diâmetro (d) [m]'
+    sht.range('F1').value = 'Coeficiente de Esteira (w)'
+    sht.range('G1').value = 'Velocidade de Serviço (Vs) [m/s]'
+    sht.range('H1').value = 'Calado (T) [m]'
+    sht.range('I1').value = 'Coef. Avanço (J0)'
+    sht.range('J1').value = 'Velocidade de Avanço (Va) [m/s]'
+    sht.range('K1').value = 'Coeficiente de Empuxo (Kt0)'
+    sht.range('L1').value = 'Empuxo (T0) [kN]'
+    sht.range('M1').value = 'Coeficiente de Torque (Kq0)'
+    sht.range('N1').value = 'Torque (Q0) [kN.m]'
+    sht.range('O1').value = 'Eficiência (n0 x nrr)'
+    sht.range('P1').value = 'Potência (DHP) [kW]'
+    sht.range('Q1').value = 'Cavitação'
 
     for i, propulsion_system in enumerate(output):
-        sht.range(f'A{i+2}').value = propulsion_system['z']
-        sht.range(f'B{i+2}').value = propulsion_system['N']
-        sht.range(f'C{i+2}').value = propulsion_system['P/D']
-        sht.range(f'D{i+2}').value = propulsion_system['AeAo']
-        sht.range(f'E{i+2}').value = propulsion_system['J0']
-        sht.range(f'F{i+2}').value = propulsion_system['Va']
-        sht.range(f'G{i+2}').value = propulsion_system['Kt0']
-        sht.range(f'H{i+2}').value = propulsion_system['T0']
-        sht.range(f'I{i+2}').value = propulsion_system['Kq0']
-        sht.range(f'J{i+2}').value = propulsion_system['Q0']
-        sht.range(f'K{i+2}').value = propulsion_system['efficiency']
-        sht.range(f'L{i+2}').value = propulsion_system['DHP']
-        sht.range(f'M{i+2}').value = propulsion_system['cavitation_eval']
+        row = i + 2
+        sht.range(f'A{row}').value = propulsion_system['z']
+        sht.range(f'B{row}').value = propulsion_system['N']
+        sht.range(f'C{row}').value = propulsion_system['P/D']
+        sht.range(f'D{row}').value = propulsion_system['AeAo']
+        sht.range(f'E{row}').value = propulsion_system['d']
+        sht.range(f'F{row}').value = propulsion_system['w']
+        sht.range(f'G{row}').value = propulsion_system['Vs']
+        sht.range(f'H{row}').value = propulsion_system['T']
+        sht.range(f'I{row}').value = propulsion_system['J0']
+        sht.range(f'J{row}').value = propulsion_system['Va']
+        sht.range(f'K{row}').value = propulsion_system['Kt0']
+        sht.range(f'L{row}').value = propulsion_system['T0']
+        sht.range(f'M{row}').value = propulsion_system['Kq0']
+        sht.range(f'N{row}').value = propulsion_system['Q0']
+        sht.range(f'O{row}').value = propulsion_system['efficiency']
+        sht.range(f'P{row}').value = propulsion_system['DHP']
+        sht.range(f'Q{row}').value = propulsion_system['cavitation_eval']
 
+    last_column = 'Q'
     last_row = len(output) + 1
 
-    all_range = f'A1:M{last_row}'
-    headers_range = 'A1:M1'
-    data_range = f'A2:M{last_row}'
+    all_range = f'A1:{last_column}{last_row}'
+    headers_range = f'A1:{last_column}1'
+    data_range = f'A2:{last_column}{last_row}'
 
     # Format of cells
     sht.range(data_range).number_format = '0.00'
     sht.range(f'A2:A{last_row}').number_format = '0'
-    sht.range(f'E2:E{last_row}').number_format = '0.000'
-    sht.range(f'F2:F{last_row}').number_format = '0.000'
-    sht.range(f'G2:G{last_row}').number_format = '0.0000'
-    sht.range(f'I2:I{last_row}').number_format = '0.0000'
+    sht.range(f'K2:K{last_row}').number_format = '0.000'
+    sht.range(f'M2:M{last_row}').number_format = '0.000'
 
     # Apply styles
     sht.tables.add(sht.used_range, table_style_name='TableStyleMedium1')

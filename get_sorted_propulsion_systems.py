@@ -1,6 +1,7 @@
 # External imports
 from math import pi
 import itertools
+from typing import cast
 
 # Internal imports
 from shared_types import Input, Output
@@ -20,11 +21,10 @@ def get_sorted_propulsion_systems(input: Input) -> Output:
         Output: List of propulsion systems ordered by efficiency
     '''
 
-    # Design parameters
-    design_parameters = input['design_parameters']
-
     # Constraints
     constraints = input['constraints']
+    T_delivered_min = constraints['T_delivered_min']
+    T_delivered_max = constraints['T_delivered_max']
 
     # Environment parameters
     environment = input['environment']
@@ -34,19 +34,11 @@ def get_sorted_propulsion_systems(input: Input) -> Output:
     Pa = environment['Pa']
     Ps = environment['Ps']
 
-    # Ship parameters
-    ship = input['ship']
-    d = ship['d']
-    Vs = ship['Vs']
-    T_required = ship['T_required']
-    w = ship['w']
-    T = ship['T']
-
     # Calculated parameters
-    Va = Vs * (1-w)  # advance velocity
-    shaft_depth = d - 0.55*T  # shaft depth
 
     unsorted_output: Output = []
+
+    design_parameters = input['design_parameters']
     combinations = itertools.product(
         # All posible combinations of design parameters
         # TODO: somehow use something like itertools.product(*design_parameters.values()),
@@ -54,12 +46,22 @@ def get_sorted_propulsion_systems(input: Input) -> Output:
         design_parameters['nblades_list'],
         design_parameters['rpms_list'],
         design_parameters['pds_list'],
-        design_parameters['aeaos_list']
+        design_parameters['aeaos_list'],
+        design_parameters['diameters_list'],
+        design_parameters['w_list'],
+        design_parameters['Vs_list'],
+        design_parameters['T_list'],
+
     )
 
-    for nblades, RPM, PD, AeAo in combinations:
+    for nblades, RPM, PD, AeAo, d, w, Vs, T in combinations:
+        # For some reason, mypy doesn't understand that nblades is an int
+        nblades = cast(int, nblades)
+
         n = RPM/60  # rotation in Hz
+        Va = Vs * (1-w)  # advaxxnce velocity
         J = Va / (n*d)  # advance ratio
+
         Re = get_Re(
             Va=Vs,  # Alho references as Va but uses Vs on spreadsheet as well
             n=n,
@@ -72,11 +74,10 @@ def get_sorted_propulsion_systems(input: Input) -> Output:
         kt = get_corrected_kt(J=J, PD=PD, AeAo=AeAo, nblades=nblades, Re=Re)
         T_delivered = (kt*rho*(n**2)*(d**4))/1000
 
-        T_min = T_required * constraints['T_min_%']
-        T_max = T_required * constraints['T_max_%']
-        if T_delivered < T_min or T_delivered > T_max:
+        if T_delivered < T_delivered_min or T_delivered > T_delivered_max:
             continue
 
+        shaft_depth = T - 0.55*d  # shaft depth
         cavitation_eval = get_cavitation_evaluation(
             rho=rho,
             Pa=Pa,
@@ -110,6 +111,10 @@ def get_sorted_propulsion_systems(input: Input) -> Output:
             'N': RPM,
             'P/D': PD,
             'AeAo': AeAo,
+            'd': d,
+            'w': w,
+            'Vs': Vs,
+            'T': T,
 
             'J0': J,
             'Va': Va,

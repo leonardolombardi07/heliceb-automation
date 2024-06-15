@@ -7,16 +7,13 @@ def pretty_print(run: Run):
     output = run['output']
 
     print("Inputs")
+    print("\n")
+
     print("Environment")
     for key, value in input['environment'].items():
         print(f'{key}: {value}')
 
-    print("\nShip")
-    for key, value in input['ship'].items():
-        print(f'{key}: {value}')
-
     print("\nConstraints")
-
     for key, value in input['constraints'].items():
         print(f'{key}: {value}')
 

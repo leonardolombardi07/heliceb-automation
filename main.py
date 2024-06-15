@@ -44,34 +44,34 @@ INPUT: Input = {
         'Pa': 101_325,  # pressão atmosférica, Pa
         'Ps': 1705.1,  # pressão de saturação da água, Pa
     },
-    'ship': {
-        'd': 3.5,  # diâmetro do propulsor, m
-        'w': 0.277,  # coeficiente de esteira
-        'Vs': 5.66,  # velocidade de serviço do navio, m/s
-        'T_required': 43.15,  # empuxo requerido, kN
-        'T': 6.3,  # calado do navio na perpendicular de vante, m
-    },
     'constraints': {
         # -1 significa que todos os sistemas serão retornados
         'max_number_of_outputed_systems': -1,
         'must_not_cavitate': False,  # se True, só retornará propulsores que não cavitem
         'min_efficiency': 0,  # eficiência mínima do propulsor
-        'T_min_%': 1,  # 1 significa 100% do empuxo requerido
-        # 10_000_000 significa 10_000_000% do empuxo requerido (um valor muito alto para não ser considerado)
-        'T_max_%': 10_000_000,
+        'T_delivered_min': 43.15,  # Mínimo empuxo requerido
+        'T_delivered_max': 10_000_000,  # Máximo empuxo requerido
         'cavitation_limit': 0.05,  # limite de cavitação
     },
     'design_parameters': {
         # Você pode usar listas normais aqui, tipo [3, 4, 5], mas np_arange_including_stop é mais prático
 
-        # lista de número de pás (exemplo: [3, 4, 5])
+        # lista de número de pás, em RPM (exemplo: [3, 4, 5])
         'nblades_list': np_arange_including_stop(start=3, stop=5, step=1),
         # lista de rotações (RPM) (exemplo: [120, 130, 140, ..., 200])
-        'rpms_list': np_arange_including_stop(start=120, stop=200, step=10),
+        'rpms_list': np_arange_including_stop(start=120, stop=200, step=20),
         # lista de razões P/D (exemplo: [0.5, 0.55, 0.6, ..., 1.5])
-        'pds_list': np_arange_including_stop(start=0.5, stop=1.4, step=0.05),
+        'pds_list': np_arange_including_stop(start=0.5, stop=1.5, step=0.5),
         # lista de razões de área Ae/Ao (exemplo: [0.3, 0.35, 0.4, ..., 1.1])
-        'aeaos_list': np_arange_including_stop(start=0.5, stop=1.4, step=0.05),
+        'aeaos_list': np_arange_including_stop(start=0.5, stop=1.5, step=0.5),
+        # lista de diâmetros, em m (exemplo: [3.5, 4, 4.5, ..., 6])
+        'diameters_list': [3.5],
+        # lista de coeficientes de esteira (exemplo: [0.25, 0.3, 0.35, ..., 0.6])
+        'w_list': [0.277],
+        # lista de velocidades do navio, em m/s (exemplo: [5.5, 6, 6.5, ..., 8])
+        'Vs_list': [5.66],
+        # lista de calados do navio na perpendicular de vante, em m (exemplo: [5, 5.5, 6, ..., 7.5])
+        'T_list': [6.3],
     }
 }
 

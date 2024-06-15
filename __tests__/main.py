@@ -9,7 +9,7 @@ CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))  # nopep8
 sys.path.append('.')  # nopep8
 
 # Internal imports
-from shared_types import EnvironmentInput, ShipInput, ConstraintsInput, Input, OutputedPropulsionSystem
+from shared_types import EnvironmentInput, ConstraintsInput, Input, OutputedPropulsionSystem
 from get_sorted_propulsion_systems import get_sorted_propulsion_systems
 
 
@@ -21,7 +21,7 @@ ALHO_WORKBOOK_EXECUTAR_MACRO_NAME = 'Executar'
 
 
 # General workbook constants
-# We consider those to be equal to the values on the workbook
+# We consider those to be equal to the values on the workbook used on this test
 
 ENVIRONMENT_INPUT: EnvironmentInput = {
     'rho': 1025.9,  # densidade da água do mar, kg/m^3
@@ -31,21 +31,14 @@ ENVIRONMENT_INPUT: EnvironmentInput = {
     'Ps': 1705.1,  # pressão de saturação da água, Pa
 }
 
-SHIP_INPUT: ShipInput = {
-    'd': 4,  # diâmetro do propulsor, m
-    'w': 0.139,  # coeficiente de esteira
-    'Vs': 6.945,  # velocidade de serviço do navio, m/s
-    'T_required': 117.25,  # empuxo requerido, kN
-    'T': 6,  # calado do navio na perpendicular de vante, m
-}
 
 CONSTRAINTS_INPUT: ConstraintsInput = {
     'max_number_of_outputed_systems': -1,
     'must_not_cavitate': False,  # se True, só retornará propulsores que não cavitem
     'min_efficiency': 0,  # eficiência mínima do propulsor
-    'T_min_%': 0,  # 1 significa 100% do empuxo requerido
-    # 10_000_000 significa 10_000_000% do empuxo requerido (um valor muito alto para não ser considerado)
-    'T_max_%': 10_000_000,
+    'T_delivered_min': 0,  # Mínimo empuxo requerido
+    # 10_000_000 significa basicamente que não há limite de empuxo
+    'T_delivered_max': 10_000_000,
     'cavitation_limit': 0.05,  # limite de cavitação
 }
 
@@ -62,13 +55,16 @@ def _run_tests():
     # Edit here the kind of prop systems you want to test
     prop_systems_to_test = [
         _create_prop_system_input(
-            nblades=3, rpms=120, pds=0.95, aeaos=0.3
+            nblades=3, rpm=120, pd=1, aeao=0.3,
+            d=3, w=0.2, Vs=5, T=6
         ),
         _create_prop_system_input(
-            nblades=4, rpms=150, pds=0.95, aeaos=0.3
+            nblades=4, rpm=150, pd=0.95, aeao=0.3,
+            d=3.5, w=0.25, Vs=5.5, T=6.5
         ),
         _create_prop_system_input(
-            nblades=2, rpms=110, pds=0.8, aeaos=0.4
+            nblades=2, rpm=110, pd=0.8, aeao=0.4,
+            d=4, w=0.3, Vs=6, T=7
         ),
     ]
 
@@ -86,26 +82,35 @@ def _run_tests():
 ######### Helper functions #########
 
 
-def _create_prop_system_input(nblades: int, rpms: int, pds: float, aeaos: float) -> Input:
+def _create_prop_system_input(
+    nblades: int, rpm: int, pd: float, aeao: float,
+        d: float, w: float, Vs: float, T: float) -> Input:
     return {
         'environment': ENVIRONMENT_INPUT,
-        'ship': SHIP_INPUT,
         'constraints': CONSTRAINTS_INPUT,
         'design_parameters': {
             'nblades_list': [nblades],
-            'rpms_list': [rpms],
-            'pds_list': [pds],
-            'aeaos_list': [aeaos],
+            'rpms_list': [rpm],
+            'pds_list': [pd],
+            'aeaos_list': [aeao],
+            'diameters_list': [d],
+            'w_list': [w],
+            'Vs_list': [Vs],
+            'T_list': [T],
         }
     }
 
 
 def _print_prop_system_input(input: Input):
     print(f'''Prop System Input:
-          Number of Blades: {input['design_parameters']['nblades_list'][0]},
-          RPM: {input['design_parameters']['rpms_list'][0]},
-          P/D: {input['design_parameters']['pds_list'][0]},
+          Number of Blades: {input['design_parameters']['nblades_list'][0]}
+          RPM: {input['design_parameters']['rpms_list'][0]}
+          P/D: {input['design_parameters']['pds_list'][0]}
           Ae/Ao: {input['design_parameters']['aeaos_list'][0]}
+          Diameter: {input['design_parameters']['diameters_list'][0]}
+          Coef. Esteira: {input['design_parameters']['w_list'][0]}
+          Ship Speed: {input['design_parameters']['Vs_list'][0]}
+          Ship Draft: {input['design_parameters']['T_list'][0]}
           ''')
 
 
@@ -115,7 +120,8 @@ def _input_data_on_Alho_workbook(input: Input):
 
     PRINCIPAL_SHEET.range(
         'F11').value = input['design_parameters']['nblades_list'][0]
-    PRINCIPAL_SHEET.range('F12').value = input['ship']['d']
+    PRINCIPAL_SHEET.range(
+        'F12').value = input['design_parameters']['diameters_list'][0]
     PRINCIPAL_SHEET.range(
         'F13').value = input['design_parameters']['rpms_list'][0]
     PRINCIPAL_SHEET.range(
@@ -124,12 +130,15 @@ def _input_data_on_Alho_workbook(input: Input):
         'F15').value = input['design_parameters']['aeaos_list'][0]
 
     PRINCIPAL_SHEET.range(
-        'J11').value = input['ship']['Vs'] * 1.94384  # m/s to knots
-    PRINCIPAL_SHEET.range('J14').value = input['ship']['T']
+        # m/s to knots
+        'J11').value = input['design_parameters']['Vs_list'][0] * 1.94384
+    PRINCIPAL_SHEET.range(
+        'J14').value = input['design_parameters']['T_list'][0]
     PRINCIPAL_SHEET.range(
         'J17').value = input['constraints']['cavitation_limit']
 
-    PRINCIPAL_SHEET.range('N11').value = input['ship']['w']
+    PRINCIPAL_SHEET.range(
+        'N11').value = input['design_parameters']['w_list'][0]
 
 
 @no_type_check
@@ -179,9 +188,9 @@ def _assert_numbers_are_close_enough(key: str, wb_num: float, num: float, relati
 
     assert relative_percentual_discrepancy <= relative_percentual_discrep_tol, f'''
     Error on key "{key}"
-    Number on Spreadsheet: {wb_num},
-    Number on Software: {num},
-    Found Discrepancy: {round(relative_percentual_discrepancy, 2)*100}%,
+    Number on Spreadsheet: {wb_num}
+    Number on Software: {num}
+    Found Discrepancy: {round(relative_percentual_discrepancy, 2)*100}%
     Max Discrepancy: {relative_percentual_discrep_tol*100}%
     '''
 
@@ -201,15 +210,14 @@ def _check_if_alho_spreadsheet_output_is_close_enough_to_software_output(input: 
             alho_val = 'ok' if alho_output_prop_system[key] == 'ok' else 'not ok'
             assert software_output_prop_system[key] == alho_val, f'''
             Error on key "{key}"
-            Value on Software: {software_output_prop_system[key]},
+            Value on Software: {software_output_prop_system[key]}
             Value on Spreadsheet: {alho_output_prop_system[key]}
             '''
 
         elif isinstance(val, int) or isinstance(val, float):
-            wb_num = cast(float, alho_output_prop_system[key])
             _assert_numbers_are_close_enough(
                 key=key,
-                wb_num=wb_num,
+                wb_num=val,
                 num=val,
                 relative_percentual_discrep_tol=MAX_RELATIVE_PERCENTUAL_DISCREPANCY
             )

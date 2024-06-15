@@ -123,7 +123,7 @@ def _write_output_sht(sht: xw.Sheet, output: Output):
     sht.range(all_range).api.VerticalAlignment = xw.constants.VAlign.xlVAlignCenter
 
 
-def save_to_excel(run: Run):
+def save_as_excel(run: Run):
     wb = xw.Book()
 
     input_sht = wb.sheets[0]

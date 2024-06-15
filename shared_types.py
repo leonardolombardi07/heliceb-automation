@@ -22,10 +22,10 @@ ConstraintsInput = TypedDict('ConstraintsInput', {
     'must_not_cavitate': bool,
 
     # Minimum delivered thrust
-    'T0_min': float,
+    'T_delivered_min': float,
 
     # Maximum delivered thrust
-    'T0_max': float,
+    'T_delivered_max': float,
 
     # Cavitation limit. Example: use 0.05 for 5% of cavitation limit
     'cavitation_limit': float,

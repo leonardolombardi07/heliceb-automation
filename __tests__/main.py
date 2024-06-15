@@ -37,8 +37,8 @@ CONSTRAINTS_INPUT: ConstraintsInput = {
     'must_not_cavitate': False,  # se True, só retornará propulsores que não cavitem
     'min_efficiency': 0,  # eficiência mínima do propulsor
     'T_delivered_min': 0,  # Mínimo empuxo requerido
-    # 10_000_000 significa basicamente que não há limite de empuxo
-    'T_delivered_max': 10_000_000,
+    # float('inf') significa que não há limite
+    'T_delivered_max': float('inf'),
     'cavitation_limit': 0.05,  # limite de cavitação
 }
 
@@ -52,7 +52,7 @@ def _run_tests():
           MAX_RELATIVE_PERCENTUAL_DISCREPANCY*100}%''')
     print("\n")
 
-    # Edit here the kind of prop systems you want to test
+    # Edit/Add here the kind of propulsion systems you want to test
     prop_systems_to_test = [
         _create_prop_system_input(
             nblades=3, rpm=120, pd=1, aeao=0.3,
@@ -196,6 +196,9 @@ def _assert_numbers_are_close_enough(key: str, wb_num: float, num: float, relati
 
 
 def _check_if_alho_spreadsheet_output_is_close_enough_to_software_output(input: Input):
+    '''For a given input, checks if the outputed propulsion system from the software is 
+    close enough to the outputed propulsion system from Alho's spreadsheet.'''
+
     assert all([
         len(cast(List[Any], num)) == 1 for num in input['design_parameters'].values()
     ]), f'Test only works for an input of a single prop system. Input: {input}'

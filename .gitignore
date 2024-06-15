@@ -1,4 +1,7 @@
 **/__pycache__/
 
-# Ignore All (xlsx) files
+# Ignore All xlsx files
 *.xlsx
+
+# Ignore all .txt files in the root directory
+/*.txt

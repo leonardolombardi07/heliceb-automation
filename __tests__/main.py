@@ -17,7 +17,7 @@ from get_sorted_propulsion_systems import get_sorted_propulsion_systems
 ALHO_WORKBOOK = xw.Book(  # type: ignore
     f'{CURRENT_DIRECTORY}/PSM (EEN554) - HéliceB (Versão 2021).xlsm')
 PRINCIPAL_SHEET = ALHO_WORKBOOK.sheets['Principal']  # type: ignore
-ALHO_WORKBOOK_EXECUTAR_MACRO_NAME = 'Executar'
+ALHO_WORKBOOK_EXECUTE_MACRO_NAME = 'Executar'
 
 
 # General workbook constants
@@ -107,10 +107,10 @@ def _print_prop_system_input(input: Input):
           RPM: {input['design_parameters']['rpms_list'][0]}
           P/D: {input['design_parameters']['pds_list'][0]}
           Ae/Ao: {input['design_parameters']['aeaos_list'][0]}
-          Diameter: {input['design_parameters']['diameters_list'][0]}
-          Coef. Esteira: {input['design_parameters']['w_list'][0]}
-          Ship Speed: {input['design_parameters']['Vs_list'][0]}
-          Ship Draft: {input['design_parameters']['T_list'][0]}
+          d: {input['design_parameters']['diameters_list'][0]}
+          w: {input['design_parameters']['w_list'][0]}
+          Vs: {input['design_parameters']['Vs_list'][0]}
+          T: {input['design_parameters']['T_list'][0]}
           ''')
 
 
@@ -150,7 +150,7 @@ def _get_outputed_system_from_Alho_workbook(input: Input) -> OutputedPropulsionS
 
     # Execute macro
     ALHO_WORKBOOK.macro(
-        ALHO_WORKBOOK_EXECUTAR_MACRO_NAME).run()  # type: ignore
+        ALHO_WORKBOOK_EXECUTE_MACRO_NAME).run()  # type: ignore
 
     # Get output data
     return {
@@ -199,8 +199,11 @@ def _assert_numbers_are_close_enough(key: str, wb_num: float, num: float, relati
 
 
 def _check_if_alho_spreadsheet_output_is_close_enough_to_software_output(input: Input):
-    '''For a given input, checks if the outputed propulsion system from the software is 
-    close enough to the outputed propulsion system from Alho's spreadsheet.'''
+    '''
+    For a given input, checks if the outputed propulsion system from the software is 
+    close enough to the outputed propulsion system from Alho's spreadsheet.
+    The input must correspond to a single propulsion system.
+    '''
 
     assert all([
         len(cast(List[Any], num)) == 1 for num in input['design_parameters'].values()
@@ -213,8 +216,7 @@ def _check_if_alho_spreadsheet_output_is_close_enough_to_software_output(input: 
 
     for key, val in software_output_prop_system.items():
         if key == 'cavitation_eval':
-            alho_val = 'ok' if alho_output_prop_system[key] == 'ok' else 'not ok'
-            assert software_output_prop_system[key] == alho_val, f'''
+            assert software_output_prop_system[key] == alho_output_prop_system[key], f'''
             Error on key "{key}"
             Value on Software: {software_output_prop_system[key]}
             Value on Spreadsheet: {alho_output_prop_system[key]}

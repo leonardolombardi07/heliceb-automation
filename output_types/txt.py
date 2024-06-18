@@ -27,10 +27,14 @@ def save_as_txt(run: Run):
             f.write(f'{key}: {value}\n')
 
         f.write("\nOutputs\n")
+
+        # Write header
+        for key in output[0].keys():
+            f.write(f'{key} ')
+        f.write('\n')
+
+        # Write data
         for item in output:
-            for key, value in item.items():
-                if isinstance(value, float):
-                    f.write(f'{key}: {value:.2f}\n')
-                else:
-                    f.write(f'{key}: {value}\n')
-            f.write("\n")
+            for value in item.values():
+                f.write(f'{value} ')
+            f.write('\n')

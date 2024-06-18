@@ -34,10 +34,6 @@ def get_sorted_propulsion_systems(input: Input) -> Output:
     Pa = environment['Pa']
     Ps = environment['Ps']
 
-    # Calculated parameters
-
-    unsorted_output: Output = []
-
     design_parameters = input['design_parameters']
     combinations = itertools.product(
         # All posible combinations of design parameters
@@ -54,12 +50,13 @@ def get_sorted_propulsion_systems(input: Input) -> Output:
 
     )
 
+    unsorted_output: Output = []
     for nblades, RPM, PD, AeAo, d, w, Vs, T in combinations:
         # For some reason, mypy doesn't understand that nblades is an int
         nblades = cast(int, nblades)
 
         n = RPM/60  # rotation in Hz
-        Va = Vs * (1-w)  # advaxxnce velocity
+        Va = Vs * (1-w)  # advance velocity
         J = Va / (n*d)  # advance ratio
 
         Re = get_Re(
@@ -94,7 +91,7 @@ def get_sorted_propulsion_systems(input: Input) -> Output:
             cavitation_limit=constraints['cavitation_limit']
         )
 
-        if constraints['must_not_cavitate'] and cavitation_eval == 'not ok':
+        if constraints['must_not_cavitate'] and cavitation_eval == 'nok':
             continue
 
         kq = get_corrected_kq(J=J, PD=PD, AeAo=AeAo,

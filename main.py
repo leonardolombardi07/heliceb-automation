@@ -27,9 +27,9 @@ pip install xlwings
 ########### INPUTS DO USUÁRIO ###########
 
 '''Tipo de output. Selecionar entre:
-Print | 'print' -> printa os resultados no console
-Excel | 'excel' -> salva os resultados em um arquivo Excel (nomeado como 'run_....xlsx')
-Txt | 'txt' -> salva os resultados em um arquivo txt (nomeado como 'output_....txt')
+'print' -> printa os resultados no console
+'excel' -> salva os resultados em um arquivo Excel (nomeado como 'run_....xlsx')
+'txt' -> salva os resultados em um arquivo txt (nomeado como 'output_....txt')
 None -> não faz nada. Útil para testar o código sem printar ou salvar os resultados'''
 OUTPUT_TYPE: Union[
     Literal['print', 'excel', 'txt'],
@@ -56,7 +56,8 @@ INPUT: Input = {
         'cavitation_limit': 0.05,  # limite de cavitação
     },
     'design_parameters': {
-        # Você pode usar listas normais aqui, tipo [3, 4, 5], mas np_arange_including_stop é mais prático
+        # Você pode usar listas normais aqui, tipo [3, 4, 5]
+        # np_arange_including_stop pode ser mais prático em alguns casos
 
         # lista de número de pás, em RPM (exemplo: [3, 4, 5])
         'nblades_list': np_arange_including_stop(start=3, stop=5, step=1),

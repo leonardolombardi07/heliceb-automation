@@ -1,6 +1,8 @@
 # External imports
-from typing import Literal
 from math import log, pi
+
+# Internal imports
+from shared_types import CavitationEvaluation
 
 
 def get_cavitation_evaluation(
@@ -21,7 +23,7 @@ def get_cavitation_evaluation(
         n: float,  # propeller rotation, rpm
 
         cavitation_limit: float,  # cavitation in limit, as percentage
-) -> Literal['ok', 'not ok']:
+) -> CavitationEvaluation:
     V_07_R_squared = (Va**2) + (pi * n * 0.7 * d)**2  # m/s
 
     P_dynamic = 0.5 * V_07_R_squared * rho  # Pa
@@ -45,4 +47,4 @@ def get_cavitation_evaluation(
 
     delta_tauc = (tauc_max/tau_c) - 1
 
-    return "ok" if delta_tauc > cavitation_limit else "not ok"
+    return "ok" if delta_tauc > cavitation_limit else "nok"

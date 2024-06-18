@@ -50,7 +50,7 @@ DesignParameters = TypedDict('DesignParameters', {
     # Sequence of propeller diameters to consider, in meters
     'diameters_list': FloatListLike,
 
-    # Sequence of coeficientes de esteira to consider
+    # Sequence of wake coefficients to consider
     'w_list': FloatListLike,
 
     # Sequence of ship speeds to consider, in m/s
@@ -65,6 +65,9 @@ Input = TypedDict('Input', {
     'constraints': ConstraintsInput,
     'design_parameters': DesignParameters,
 })
+
+# To be consistent with Alho's spreadsheet
+CavitationEvaluation = Literal['ok', 'nok']
 
 OutputedPropulsionSystem = TypedDict('OutputedPropulsionSystem', {
     # Inputs on Alho's spreadsheet
@@ -90,7 +93,7 @@ OutputedPropulsionSystem = TypedDict('OutputedPropulsionSystem', {
     'efficiency': float,  # propeller efficiency
     'DHP': float,  # delivered horsepower
 
-    'cavitation_eval': Literal['ok', 'not ok'],  # cavitation evaluation
+    'cavitation_eval': CavitationEvaluation,  # cavitation evaluation
 })
 
 Output = Sequence[OutputedPropulsionSystem]

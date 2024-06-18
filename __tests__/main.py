@@ -37,7 +37,7 @@ CONSTRAINTS_INPUT: ConstraintsInput = {
     'must_not_cavitate': False,  # se True, só retornará propulsores que não cavitem
     'min_efficiency': 0,  # eficiência mínima do propulsor
     'T_delivered_min': 0,  # Mínimo empuxo entregue, kN
-    # Máximo empuxo entregue, kN. float('inf') significa que não há limite
+    # Máximo empuxo entregue, kN. float('inf') = infinito = não há limite
     'T_delivered_max': float('inf'),
     'cavitation_limit': 0.05,  # limite de cavitação
 }

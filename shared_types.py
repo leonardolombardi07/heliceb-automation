@@ -24,7 +24,7 @@ ConstraintsInput = TypedDict('ConstraintsInput', {
     # Minimum delivered thrust, in kN
     'T_delivered_min': float,
 
-    # Maximum delivered thrust, in kN. float('inf') means no limit
+    # Maximum delivered thrust, in kN. float('inf') = infinity = means no limit
     'T_delivered_max': float,
 
     # Cavitation limit. Example: use 0.05 for 5% of cavitation limit

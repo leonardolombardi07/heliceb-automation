@@ -9,11 +9,9 @@ from get_sorted_propulsion_systems import get_sorted_propulsion_systems
 
 
 '''Leo: (12/06/2024)
-Descrição do código:
-
 Esse código automatiza o processo de variação de parâmetros de input utilizados na planilha 'Hélice B' do professor Alexandre Alho.
 Editando-se os parâmetros de input na seção 'INPUTS DO USUÁRIO' (abaixo nesse arquivo) e executando o código, o programa gera uma 
-lista de propulsores (com suas características como empuxo entregue, kt, kq, etc...), ordenados por eficiência, dentro das restrições impostas.
+lista de propulsores (com suas características, como empuxo entregue, kt, kq, etc...), ordenados por eficiência, dentro das restrições impostas.
 O output pode ser mostrado no terminal/console (famoso 'print'), salvo como arquivo de texto (.txt) ou salvo como arquivo Excel (necessário ter 
 a biblioteca xlwings instalada).
 
@@ -28,7 +26,7 @@ pip install xlwings
 
 '''Tipo de output. Selecionar entre:
 'print' -> printa os resultados no console
-'excel' -> salva os resultados em um arquivo Excel (nomeado como 'run_....xlsx')
+'excel' -> salva os resultados em um arquivo Excel (nomeado como 'output_....xlsx')
 'txt' -> salva os resultados em um arquivo txt (nomeado como 'output_....txt')
 None -> não faz nada. Útil para testar o código sem printar ou salvar os resultados'''
 OUTPUT_TYPE: Union[
@@ -51,7 +49,7 @@ INPUT: Input = {
         'must_not_cavitate': False,  # se True, só retornará propulsores que não cavitam
         'min_efficiency': 0,  # eficiência mínima do propulsor
         'T_delivered_min': 43.15,  # Mínimo empuxo entregue, kN
-        # Máximo empuxo entregue, kN. float('inf') significa que não há limite
+        # Máximo empuxo entregue, kN. float('inf') = infinito = não há limite
         'T_delivered_max': float('inf'),
         'cavitation_limit': 0.05,  # limite de cavitação
     },
